@@ -48,14 +48,14 @@ function Player:update(dt)
         else
             self.anim = self.animations.idle
         end
+    else
+        self.anim = self.animations.idle
     end
 
     self.collider:setLinearVelocity(vx, vy)
     self.pos.x = self.collider:getX()
     self.pos.y = self.collider:getY()
-
     self.anim:update(dt)
-    --print(self.pos)
 end
 
 function Player:draw()

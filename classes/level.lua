@@ -8,12 +8,16 @@ function Level:new()
     Map[4] = sti('img/map/Map4.lua')
     Map[5] = sti('img/map/Map5.lua')
     Map[6] = sti('img/map/Map6.lua')
+    Map[7] = sti('img/map/Map7.lua')
     gameMap = Map[1]
     walls = {}
     self.loadWalls(self)
     end
 
 function Level:update(dt)
+    -- Controle de entrada dos mapas (hitbox para passar de mapa)
+    -- Instância da próxima fase / reposicionamento do player na fase
+
     if player.pos.x > 768 and gameMap == Map[1] then
         gameMap = Map[2]
         self.loadWalls(self)
@@ -39,9 +43,22 @@ function Level:update(dt)
         player.collider:setX(96)
         player.collider:setY(224)
     end
+
+    if player.pos.x > 80 and player.pos.x < 110 and player.pos.y > 140 and player.pos.y < 160 and gameMap == Map[6] then
+        gameMap = Map[7]
+        self.loadWalls(self)
+        player.collider:setX(24)
+        player.collider:setY(24)
+    end
+
+    if player.pos.x > 702 and player.pos.x < 736 and player.pos.y > 70 and player.pos.y < 90 and gameMap == Map[7] then
+        sound.sounds.pass:play()
+        menu.ingame = 5
+    end
 end
 
 function Level:draw()
+    -- Controle das camadas a serem desenhadas de cada fase
     if gameMap == Map[1] then
         gameMap:drawLayer(gameMap.layers["Floor"])
         gameMap:drawLayer(gameMap.layers["Spawn"])
@@ -102,8 +119,18 @@ function Level:draw()
         gameMap:drawLayer(gameMap.layers["Trees2"])
         player:draw()
     end
+
+    if gameMap == Map[7] then
+        gameMap:drawLayer(gameMap.layers["Floor"])
+        gameMap:drawLayer(gameMap.layers["Wall"])
+        gameMap:drawLayer(gameMap.layers["Roof"])
+        gameMap:drawLayer(gameMap.layers["Walls"])
+        gameMap:drawLayer(gameMap.layers["Door"])
+        player:draw()
+    end
 end
 
+-- Destroi os colliders anteriores e adicionar os novos da fase
 function Level:loadWalls()
     for i, wall in pairs(walls) do
         wall:destroy()

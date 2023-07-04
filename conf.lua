@@ -1,7 +1,7 @@
 function love.conf(t)
     t.console = true
-    t.window.title = "Game Final"
-    t.window.icon = nil
+    t.window.title = "Reino Perdido"
+    t.window.icon = 'img/menu/icon.png'
     t.window.width = 768
     t.window.height = 576
     t.window.resizable = false

@@ -10,6 +10,7 @@ function love.load()
     -- Classes
     require "classes/typing"
     require "classes/player"
+    require "classes/light"
     require "classes/sound"
     require "classes/level"
     require "classes/menu"
@@ -66,18 +67,19 @@ function love.update(dt)
             if typing ~= nil then
                 typing = nil
             end
+            print(mouse)
         end
 
-    -- Carrega o save do arquivo
-
+        if gameMap == Map[7] then
+            if light == nil then
+                light = Light()
+            end
+            light:update(dt)
+        end
 
         world:update(dt)
         level:update(dt)
         player:update(dt)
-    end
-
-    if menu.ingame == 5 then
-        
     end
 
     menu:update(dt)
@@ -97,5 +99,66 @@ function love.draw()
         if typing ~= nil then
             typing:draw()
         end
+
+        if light ~= nil then
+            light:draw()
+        end
+    end
+
+    -- Texto de créditos do fim de jogo
+    if menu.ingame == 5 then
+        local text = 'Parabéns, você conseguiu sobreviver aos desafios,'
+        local x = love.graphics.getWidth()
+        font = love.graphics.newFont("fonts/PeaberryBase.ttf", 24)
+        local fx = font.getWidth(font, text)
+        love.graphics.print(text, x/2 - fx/2, 100)
+        text = 'agora você está livre e herdou'
+        fx = font.getWidth(font, text)
+        love.graphics.print(text, x/2 - fx/2, 130)
+        
+        text = 'todo o território do Reino Perdido!'
+        fx = font.getWidth(font, text)
+        love.graphics.print(text, x/2 - fx/2, 160)
     end
 end
+
+function love.keypressed( key )
+    -- Handle para a fase de digitação de sequências
+    if gameMap ~= nil and gameMap == Map[5] then
+        if typing.sequenceBoss[typing.current] == key then
+            typing.current = typing.current + 1
+
+            -- Som de acerto da tecla
+            if typing.current ~= #typing.sequenceBoss + 1 then
+                sound.sounds.type:stop()
+                sound.sounds.type:play()
+            end
+
+            -- Som de conclusão de uma sequência
+            if typing.current == #typing.sequenceBoss + 1 then
+                sound.sounds.pass:stop()
+                sound.sounds.pass:play()
+                typing:deleteSequence(typing.sequenceBoss)
+                typing.current = 1
+                typing.wave = typing.wave + 1
+                typing.currentTime = 0
+            end
+
+        -- Som ao errar
+        else
+            typing:deleteSequence(typing.sequenceBoss)
+            typing.hits = typing.hits + 1
+            sound.sounds.hurt:play()
+            typing.current = 1
+        end
+
+    end
+
+    -- Handle para a fase de GO / STOP
+    if gameMap ~= nil and gameMap == Map[7] then
+        if light.canWalk == false and (key == 'w' or key == 'a' or key == 's' or key == 'd') then
+            sound.sounds.hurt:play()
+            light.hit = light.hit + 1
+        end
+    end
+ end

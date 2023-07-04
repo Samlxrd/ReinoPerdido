@@ -30,6 +30,7 @@ function Fire:update(dt)
     self.counter = self.counter + dt
     self.intervalCounter = self.intervalCounter + dt
 
+    -- Alinhando as sprites ao collider
     for i, prj in ipairs(ProjectileList) do
         prj.pos.x = prj:getX()
         prj.pos.y = prj:getY()
@@ -43,6 +44,8 @@ function Fire:update(dt)
         if sound.sounds.fight1:isPlaying() then
             sound.sounds.fight1:stop()
         end
+
+        sound.sounds.pass:play()
         gameMap = Map[4]
         level.loadWalls(level)
         player.collider:setX(64)
@@ -69,14 +72,15 @@ function Fire:update(dt)
         end
     end
 
+    -- Busca simples para alinhar a altura do goblin ao player
     self.dir = player.pos.y - self.pos.y
-
     if  self.dir > 0 then
         self.pos.y = self.pos.y + self.speed
     else
         self.pos.y = self.pos.y - self.speed
     end
 
+    -- Se for acertado 3 vezes, perde a fase
     if self.hits == 3 then
         for i, prj in pairs(ProjectileList) do
             prj:destroy()
@@ -93,12 +97,14 @@ function Fire:update(dt)
 end
 
 function Fire:draw()
+
     if #ProjectileList > 0 then
         for i, prj in ipairs(ProjectileList) do
             love.graphics.draw(self.img, prj.pos.x, prj.pos.y)
         end
     end
 
+    -- Display do tempo restante para sobreviver
     local x = love.graphics.getWidth()
     font = love.graphics.newFont("fonts/PeaberryBase.ttf", 24)
     love.graphics.setFont(font)

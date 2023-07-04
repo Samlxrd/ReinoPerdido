@@ -14,12 +14,15 @@ function Typing:new()
 end
 
 function Typing:update(dt)
+
+    -- Se terminou a sequência, gera uma nova
     if #self.sequenceBoss == 0 then
         self.sequenceBoss = self.createSequence(self, self.diff)
     end
 
     self.currentTime = self.currentTime + dt
 
+    -- Tempo limite para digitar a sequência
     if self.currentTime >= self.TimeLimit then
         self.hits = self.hits + 1
         sound.sounds.hurt:play()
@@ -27,35 +30,45 @@ function Typing:update(dt)
         self.currentTime = 0
     end
 
+    -- Se errar ou passar do tempo 3 vezes, perde a fase
+    if self.hits >= 3 then
+        typing = nil
+        gameMap = Map[4]
+        level.loadWalls(level)
+        player.collider:setX(452)
+        player.collider:setY(522)
+    end
+
+    -- Increase diff
     if self.wave == 10 then
         self.diff = 5
     end
 
+    -- Increase diff
     if self.wave == 20 then
         self.diff = 6
     end
 
-    if self.wave == 23 then
+    -- Passa de fase
+    if self.wave == 26 then
+        sound.sounds.pass:play()
         gameMap = Map[6]
         level.loadWalls(level)
         player.collider:setX(608)
         player.collider:setY(448)
     end
-    --[[ if #self.sequenceBoss > 0 then
-        for i, s in ipairs(self.sequenceBoss) do
-            print(i, s)
-        end
-        print('\n\n')
-    end ]]
 end
 
 function Typing:draw()
+
+    -- Temporizador
     local timer = string.format("%.0f", self.TimeLimit-self.currentTime)
     local x = love.graphics.getWidth()
     font = love.graphics.newFont("fonts/PeaberryBase.ttf", 24)
     local fx = font.getWidth(font, timer)
     love.graphics.print(timer, x/2 - fx/2, 20)
 
+    -- Sequência
     love.graphics.setFont(font)
     fx = font.getWidth(font, self.text)
     love.graphics.print(self.text, x/2 - fx/2, 40)
@@ -83,32 +96,3 @@ function Typing:deleteSequence(sequence)
     end
     self.sequenceBoss = {}
 end
-
-function love.keypressed( key )
-    if gameMap ~= nil and gameMap == Map[5] then
-        if typing.sequenceBoss[typing.current] == key then
-            typing.current = typing.current + 1
-
-            if typing.current ~= #typing.sequenceBoss + 1 then
-                sound.sounds.type:stop()
-                sound.sounds.type:play()
-            end
-
-            if typing.current == #typing.sequenceBoss + 1 then
-                sound.sounds.pass:stop()
-                sound.sounds.pass:play()
-                typing:deleteSequence(typing.sequenceBoss)
-                typing.current = 1
-                typing.wave = typing.wave + 1
-                typing.currentTime = 0
-            end
-
-        else
-            typing:deleteSequence(typing.sequenceBoss)
-            typing.hits = typing.hits + 1
-            sound.sounds.hurt:play()
-            typing.current = 1
-        end
-
-    end
- end
